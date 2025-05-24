@@ -1,0 +1,48 @@
+{
+  "name": "vue-multi-window",
+  "version": "1.0.0",
+  "description": "Vue composable for managing multiple windows across displays, with cross-window communication",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vue",
+    "composable",
+    "multi-window",
+    "multi-monitor",
+    "window-management",
+    "cross-window-communication"
+  ],
+  "author": "sousaivan",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vue-multi-window"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/vue-multi-window/issues"
+  },
+  "homepage": "https://github.com/yourusername/vue-multi-window#readme"
+} 
