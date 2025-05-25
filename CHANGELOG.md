@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.0.7
+
+### Patch Changes
+
+- 445842c: fix publishing scope
+
 ## 1.0.6
 
 ### Patch Changes
