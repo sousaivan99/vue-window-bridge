@@ -10,6 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   publish:
@@ -17,9 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
+      # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
           node-version: 22.x
@@ -27,18 +31,24 @@ jobs:
 
       - run: bun install
       
-      # Setup npm authentication - this creates .npmrc with the token
-      - name: Setup NPM Auth
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Build the package
+      - name: Build
+        run: bun run build
       
-      - name: Create Release Pull Request or Publish
+      # Try changesets publish first
+      - name: Publish with Changesets
         id: changesets
+        continue-on-error: true
         uses: changesets/action@v1
         with:
           publish: bun run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      # Fallback to direct npm publish if changesets fails
+      - name: Direct npm publish
+        if: steps.changesets.outcome != 'success'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

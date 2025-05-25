@@ -1,6 +1,6 @@
 {
   "name": "vue-window-bridge",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Vue composable for managing multiple windows across displays, with cross-window communication",
   "type": "module",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
-    "release": "bunx changeset publish --access public",
+    "release": "changeset publish --access public",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
