@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.1.0
+
+### Minor Changes
+
+- 03f39f3: Added support for sending data to child
+
 ## 1.0.15
 
 ### Patch Changes
