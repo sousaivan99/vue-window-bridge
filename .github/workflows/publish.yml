@@ -31,24 +31,27 @@ jobs:
 
       - run: bun install
       
+      # Explicitly create .npmrc with token
+      - name: Setup NPM auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+          cat ~/.npmrc
+          npm config list
+      
+      # Verify npm authentication works
+      - name: Verify npm authentication
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
       # Build the package
       - name: Build
         run: bun run build
       
-      # Try changesets publish first
-      - name: Publish with Changesets
-        id: changesets
-        continue-on-error: true
-        uses: changesets/action@v1
-        with:
-          publish: bun run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
-      # Fallback to direct npm publish if changesets fails
-      - name: Direct npm publish
-        if: steps.changesets.outcome != 'success'
-        run: npm publish --provenance --access public
+      # Use npm directly for publishing
+      - name: Publish to npm
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
