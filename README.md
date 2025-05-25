@@ -34,16 +34,22 @@ import { ref, watch } from 'vue'
 import { useMultiWindow } from 'vue-window-bridge'
 
 // Initialize with optional configuration
-const { openWindowOnSecondMonitor, receivedData, closeChildWindow } = useMultiWindow({
+const { openWindowOnSecondMonitor, receivedData, closeChildWindow, sendDataToChild } = useMultiWindow({
   debug: true, // Enable debug logging
   fullscreen: true, // Open in fullscreen mode (default)
   preferredScreen: 1 // Optional: prefer a specific screen index
 })
 
-// Track received data
+// Track received data from child window
 watch(receivedData, (newData) => {
   if (newData) {
     console.log('Received data from child window:', newData)
+    
+    // Optional: respond to the child with data
+    sendDataToChild({ 
+      response: 'Data received by parent',
+      timestamp: new Date().toISOString()
+    })
   }
 })
 
@@ -58,7 +64,7 @@ const openSecondaryWindow = () => {
   <button @click="closeChildWindow">Close Child Window</button>
   
   <div v-if="receivedData">
-    <h3>Received Data:</h3>
+    <h3>Received Data from Child:</h3>
     <pre>{{ receivedData }}</pre>
   </div>
 </template>
@@ -68,10 +74,17 @@ const openSecondaryWindow = () => {
 
 ```vue
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useMultiWindow } from 'vue-window-bridge'
 
-const { isChildWindow, sendDataToParent } = useMultiWindow()
+const { isChildWindow, sendDataToParent, receivedData } = useMultiWindow()
+
+// Track received data from parent window
+watch(receivedData, (newData) => {
+  if (newData) {
+    console.log('Received data from parent window:', newData)
+  }
+})
 
 // Optional: Check if this is a child window
 onMounted(() => {
@@ -96,6 +109,11 @@ const sendDataToParentWindow = () => {
   <div>
     <h1>Child Window</h1>
     <button @click="sendDataToParentWindow">Send Data to Parent</button>
+    
+    <div v-if="receivedData">
+      <h3>Received Data from Parent:</h3>
+      <pre>{{ receivedData }}</pre>
+    </div>
   </div>
 </template>
 ```
@@ -119,11 +137,12 @@ const {
   // State
   childWindow,          // Ref<Window | null> - Reference to the child window
   isChildWindowOpen,    // Ref<boolean> - Whether child window is open
-  receivedData,         // Ref<any> - Data received from child window
+  receivedData,         // Ref<any> - Data received from other window (parent or child)
   
   // Methods
   openWindowOnSecondMonitor, // (path: string) => Promise<Window | null>
-  sendDataToParent,     // (data: any) => void
+  sendDataToParent,     // (data: any) => void - Send data from child to parent
+  sendDataToChild,      // (data: any) => void - Send data from parent to child
   closeChildWindow,     // () => void
   isChildWindow,        // () => boolean
   requestFullscreenForSelf, // () => void

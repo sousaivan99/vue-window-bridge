@@ -307,7 +307,7 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
     }
   }
   
-  // Function to send data from child window to parent window
+  // Function to send data from child window to parent
   const sendDataToParent = (data: any) => {
     if (typeof window === 'undefined') return;
     
@@ -329,6 +329,29 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       }
     } catch (error) {
       log('Error sending data to parent', error)
+    }
+  }
+
+  const sendDataToChild = (data: any) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      if (childWindow.value && !childWindow.value.closed) {
+        log('Sending data to child window', data)
+        
+        // Convert Vue reactive objects to plain objects
+        const plainData = typeof toRaw === 'function' 
+          ? toRaw(data) 
+          : JSON.parse(JSON.stringify(data))
+        
+        // Send the data to the child window
+        childWindow.value.postMessage(plainData, childOrigin.value || '*')
+        log('Data sent to child window', plainData)
+      } else {
+        log('No child window found or window is closed')
+      }
+    } catch (error) {
+      log('Error sending data to child window', error)
     }
   }
   
@@ -522,6 +545,17 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       if (event.source === window.opener) {
         if (event.data === 'REQUEST_FULLSCREEN') {
           requestFullscreenForSelf()
+        } else {
+          // Handle regular data received from parent
+          log('Received data from parent window', event.data)
+          receivedData.value = event.data
+          
+          // Emit an event when data is received
+          if (window.document) {
+            window.document.dispatchEvent(
+              new CustomEvent('multi-window-data', { detail: event.data })
+            )
+          }
         }
       }
     })
@@ -540,11 +574,12 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
     // State
     childWindow,
     isChildWindowOpen,
-    receivedData,
+    receivedData, // Contains data received from parent (if child window) or child (if parent window)
     
     // Methods
     openWindowOnSecondMonitor,
-    sendDataToParent,
+    sendDataToParent, // Send data from child to parent
+    sendDataToChild,  // Send data from parent to child
     closeChildWindow,
     isChildWindow,
     requestFullscreenForSelf,

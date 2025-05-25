@@ -1,6 +1,6 @@
 # Publishing Guide
 
-This document outlines the steps to publish your `vue-multi-window` package to npm.
+This document outlines the steps to publish your `vue-window-bridge` package to npm.
 
 ## Preparation
 
@@ -55,7 +55,7 @@ If you want to publish under your npm username or organization (recommended), up
 
 ```json
 {
-  "name": "@your-username/vue-multi-window",
+  "name": "@your-username/vue-window-bridge",
   ...
 }
 ```
