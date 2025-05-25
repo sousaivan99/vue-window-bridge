@@ -26,19 +26,17 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 22.x
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://registry.npmjs.org/' # Trailing slash is good
+          scope: '@sousaivan' # Optional, but good if your packages are scoped
+        env: # Pass token directly to setup-node for .npmrc configuration
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # <--- Pass here!
 
       - run: bun install
-      
+
       # Build the package
       - name: Build
         run: bun run build
-      
-      # Try a direct npm login approach
-      - name: NPM Auth and Publish
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
-          npm config list
-          npm publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Publish to npm (no manual .npmrc echo needed)
+      - name: Publish to npm
+        run: npm publish # --access public is covered by publishConfig in package.json
