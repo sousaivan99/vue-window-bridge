@@ -1,2 +1,2 @@
-export { useMultiWindow } from './useMultiWindow'
-export type { MultiWindowOptions } from './useMultiWindow'
+export { useMultiWindow } from './useMultiWindow.js'
+export type { MultiWindowOptions } from './useMultiWindow.js'

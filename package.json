@@ -1,5 +1,5 @@
 {
-  "name": "vue-multi-window",
+  "name": "vue-window-bridge",
   "version": "1.0.0",
   "description": "Vue composable for managing multiple windows across displays, with cross-window communication",
   "type": "module",
@@ -39,10 +39,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/vue-multi-window"
+    "url": "https://github.com/sousaivan99/vue-window-bridge"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/vue-multi-window/issues"
+    "url": "https://github.com/sousaivan99/vue-window-bridge/issues"
   },
-  "homepage": "https://github.com/yourusername/vue-multi-window#readme"
+  "homepage": "https://github.com/sousaivan99/vue-window-bridge#readme"
 } 
