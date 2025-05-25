@@ -1,4 +1,5 @@
 name: Publish
+
 on:
   workflow_run:
     workflows: [CI]
@@ -8,35 +9,51 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: write # Required for changesets to create/update release PRs and tags
+  pull-requests: write # Required for changesets to create/update release PRs
+  id-token: write # Good for OIDC, though not strictly needed for basic npm publish
 
 jobs:
   publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - uses: oven-sh/setup-bun@v1
+          fetch-depth: 0 # Important for changesets to read full Git history
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - uses: actions/setup-node@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 22.x
-          registry-url: 'https://registry.npmjs.org/' # Trailing slash is good
-          scope: '@sousaivan' # Optional, but good if your packages are scoped
-        env: # Pass token directly to setup-node for .npmrc configuration
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # <--- Pass here!
+          node-version: 22.x # Use Node.js v22.x as per your preference
+          registry-url: 'https://registry.npmjs.org/' # Configures .npmrc for npm publish
+          # scope: '@sousaivan' # Optional: Uncomment if your packages are scoped
+        env:
+          # Pass the NPM_TOKEN to setup-node so it can configure .npmrc correctly
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - run: bun install
+      - name: Install dependencies
+        run: bun install --frozen-lockfile # Use --frozen-lockfile for CI stability
 
-      # Build the package
-      - name: Build
-        run: bun run build
-
-      # Publish to npm (no manual .npmrc echo needed)
-      - name: Publish to npm
-        run: npm publish # --access public is covered by publishConfig in package.json
+      # The 'bun run release' command (which changesets will execute)
+      # will trigger your 'prepublishOnly' script, which in turn runs 'bun run build'.
+      # So, an explicit 'Build' step here is redundant.
+      - name: Create Release Pull Request or Publish
+        id: changesets # ID for accessing outputs from this step
+        uses: changesets/action@v1
+        with:
+          # This command will be executed by changesets to publish your package.
+          # It will trigger your 'prepublishOnly' script (bun run build) automatically.
+          publish: bun run release
+        env:
+          # GITHUB_TOKEN is required for changesets to interact with GitHub (PRs, releases)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN is required for the 'bun run release' command (which calls npm publish)
+          # to authenticate with the npm registry.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
