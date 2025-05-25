@@ -15,13 +15,13 @@ A Vue composable for opening and managing multiple windows across different moni
 ## Installation
 
 ```bash
-npm install vue-multi-window
+npm install vue-window-bridge
 # or
-yarn add vue-multi-window
+yarn add vue-window-bridge
 # or
-pnpm add vue-multi-window
+pnpm add vue-window-bridge
 # or
-bun add vue-multi-window
+bun add vue-window-bridge
 ```
 
 ## Basic Usage
@@ -31,7 +31,7 @@ bun add vue-multi-window
 ```vue
 <script setup>
 import { ref, watch } from 'vue'
-import { useMultiWindow } from 'vue-multi-window'
+import { useMultiWindow } from 'vue-window-bridge'
 
 // Initialize with optional configuration
 const { openWindowOnSecondMonitor, receivedData, closeChildWindow } = useMultiWindow({
@@ -69,7 +69,7 @@ const openSecondaryWindow = () => {
 ```vue
 <script setup>
 import { onMounted } from 'vue'
-import { useMultiWindow } from 'vue-multi-window'
+import { useMultiWindow } from 'vue-window-bridge'
 
 const { isChildWindow, sendDataToParent } = useMultiWindow()
 

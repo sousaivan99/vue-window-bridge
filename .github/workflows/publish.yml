@@ -23,7 +23,6 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
           node-version: 22.x
@@ -31,27 +30,15 @@ jobs:
 
       - run: bun install
       
-      # Explicitly create .npmrc with token
-      - name: Setup NPM auth
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
-          cat ~/.npmrc
-          npm config list
-      
-      # Verify npm authentication works
-      - name: Verify npm authentication
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
       # Build the package
       - name: Build
         run: bun run build
       
-      # Use npm directly for publishing
-      - name: Publish to npm
-        run: npm publish --access public
+      # Try a direct npm login approach
+      - name: NPM Auth and Publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+          npm config list
+          npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

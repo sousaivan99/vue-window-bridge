@@ -472,20 +472,6 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
                         }
                       }
                     });
-                    
-                    // Let the parent know we're ready for maximize/fullscreen
-                    if (window.opener) {
-                      window.opener.postMessage('READY_FOR_MAXIMIZE', '${window.location.origin}');
-                      
-                      // Also set up event listener for beforeunload to notify parent when we close
-                      window.addEventListener('beforeunload', function() {
-                        try {
-                          window.opener.postMessage('CHILD_WINDOW_CLOSING', '${window.location.origin}');
-                        } catch(e) {
-                          // Ignore errors during window closing
-                        }
-                      });
-                    }
                   } catch(e) {
                     console.error('[MultiWindow] Error in initialization script:', e);
                   }
