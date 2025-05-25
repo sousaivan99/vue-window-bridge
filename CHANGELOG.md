@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.0.8
+
+### Patch Changes
+
+- ba6d43f: fix publishing
+
 ## 1.0.7
 
 ### Patch Changes
