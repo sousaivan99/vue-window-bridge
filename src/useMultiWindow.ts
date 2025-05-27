@@ -436,6 +436,17 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       // Set flag to indicate child window is open
       isChildWindowOpen.value = true
       
+      // Add beforeunload event listener to the child window
+      try {
+        childWindow.value.addEventListener('beforeunload', () => {
+          log('Child window is closing')
+          isChildWindowOpen.value = false
+          childWindow.value = null
+        })
+      } catch (error) {
+        log('Error setting up beforeunload listener', error)
+      }
+      
       // Try to move to the correct position after a short delay
       // This can help in some browsers where the initial positioning doesn't work
       setTimeout(() => {
