@@ -275,6 +275,17 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
     }
   }
   
+  // Function to check if window is closed and update state
+  const checkAndUpdateWindowState = () => {
+    if (childWindow.value && childWindow.value.closed) {
+      log('Child window is closed')
+      isChildWindowOpen.value = false
+      childWindow.value = null
+      return true
+    }
+    return false
+  }
+  
   // Function to receive messages from child window
   const receiveMessage = (event: MessageEvent) => {
     // Verify origin for security
@@ -294,6 +305,10 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       // If we still want fullscreen functionality
       log('Child window is ready for fullscreen')
       requestFullscreenForWindow(childWindow.value)
+    } else if (event.data === 'CHILD_WINDOW_CLOSED') {
+      log('Received window closed notification')
+      isChildWindowOpen.value = false
+      childWindow.value = null
     }
     
     log('Received data from child window', event.data)
@@ -349,9 +364,11 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
         log('Data sent to child window', plainData)
       } else {
         log('No child window found or window is closed')
+        checkAndUpdateWindowState()
       }
     } catch (error) {
       log('Error sending data to child window', error)
+      checkAndUpdateWindowState()
     }
   }
   
@@ -436,15 +453,31 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       // Set flag to indicate child window is open
       isChildWindowOpen.value = true
       
-      // Add beforeunload event listener to the child window
+      // Add unload event listener to the child window
       try {
-        childWindow.value.addEventListener('beforeunload', () => {
-          log('Child window is closing')
-          isChildWindowOpen.value = false
-          childWindow.value = null
-        })
+        // Inject a script into the child window to notify parent when it closes
+        const unloadScript = `
+          window.addEventListener('unload', function() {
+            if (window.opener) {
+              window.opener.postMessage('CHILD_WINDOW_CLOSED', '*');
+            }
+          });
+        `;
+        
+        // Execute the script in the child window
+        if (childWindow.value) {
+          try {
+            // @ts-ignore - Ignoring type check for eval which is needed for this functionality
+            childWindow.value.eval(unloadScript);
+          } catch (evalError) {
+            // Fallback if eval is not available
+            const scriptEl = childWindow.value.document.createElement('script');
+            scriptEl.textContent = unloadScript;
+            childWindow.value.document.head.appendChild(scriptEl);
+          }
+        }
       } catch (error) {
-        log('Error setting up beforeunload listener', error)
+        log('Error setting up unload listener', error)
       }
       
       // Try to move to the correct position after a short delay
