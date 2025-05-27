@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.1.3
+
+### Patch Changes
+
+- ddf6841: fix isChildWindowOpen reactivity
+
 ## 1.1.2
 
 ### Patch Changes
