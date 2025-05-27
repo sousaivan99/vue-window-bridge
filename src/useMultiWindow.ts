@@ -305,10 +305,6 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       // If we still want fullscreen functionality
       log('Child window is ready for fullscreen')
       requestFullscreenForWindow(childWindow.value)
-    } else if (event.data === 'CHILD_WINDOW_CLOSED') {
-      log('Received window closed notification')
-      isChildWindowOpen.value = false
-      childWindow.value = null
     }
     
     log('Received data from child window', event.data)
@@ -453,119 +449,19 @@ export const useMultiWindow = (options: MultiWindowOptions = {}) => {
       // Set flag to indicate child window is open
       isChildWindowOpen.value = true
       
-      // Add unload event listener to the child window
-      try {
-        // Inject a script into the child window to notify parent when it closes
-        const unloadScript = `
-          window.addEventListener('unload', function() {
-            if (window.opener) {
-              window.opener.postMessage('CHILD_WINDOW_CLOSED', '*');
-            }
-          });
-        `;
-        
-        // Execute the script in the child window
-        if (childWindow.value) {
-          try {
-            // @ts-ignore - Ignoring type check for eval which is needed for this functionality
-            childWindow.value.eval(unloadScript);
-          } catch (evalError) {
-            // Fallback if eval is not available
-            const scriptEl = childWindow.value.document.createElement('script');
-            scriptEl.textContent = unloadScript;
-            childWindow.value.document.head.appendChild(scriptEl);
-          }
+      // Set up a check for window closure
+      const checkWindow = () => {
+        if (checkAndUpdateWindowState()) {
+          return
         }
-      } catch (error) {
-        log('Error setting up unload listener', error)
+        // Check again in 1 second if window is still open
+        if (isChildWindowOpen.value) {
+          setTimeout(checkWindow, 1000)
+        }
       }
       
-      // Try to move to the correct position after a short delay
-      // This can help in some browsers where the initial positioning doesn't work
-      setTimeout(() => {
-        try {
-          if (childWindow.value && !childWindow.value.closed) {
-            childWindow.value.focus()
-            
-            // Set up maximize handling if fullscreen option is enabled
-            if (fullscreen) {
-              try {
-                const maximizeScript = `
-                  try {
-                    // Set up event listener for maximize request message
-                    window.addEventListener('message', function(event) {
-                      if (event.data === 'MAXIMIZE_WINDOW') {
-                        console.log('[MultiWindow] Received maximize request');
-                        try {
-                          // Some browsers support window.maximize()
-                          if (window.maximize) {
-                            window.maximize();
-                          } 
-                          // For browsers that don't support maximize, try moveTo and resizeTo
-                          else {
-                            // Get the screen dimensions
-                            const screenWidth = window.screen.availWidth || window.screen.width;
-                            const screenHeight = window.screen.availHeight || window.screen.height;
-                            
-                            // Move to top-left of the screen
-                            window.moveTo(0, 0);
-                            
-                            // Resize to maximum available size
-                            window.resizeTo(screenWidth, screenHeight);
-                          }
-                          console.log('[MultiWindow] Window maximized');
-                        } catch(e) {
-                          console.error('[MultiWindow] Error maximizing window:', e);
-                        }
-                      } else if (event.data === 'REQUEST_FULLSCREEN') {
-                        console.log('[MultiWindow] Received fullscreen request');
-                        try {
-                          const element = document.documentElement;
-                          
-                          // Try different fullscreen methods
-                          const requestFullscreen = element.requestFullscreen || 
-                            element.webkitRequestFullscreen || 
-                            element.mozRequestFullScreen || 
-                            element.msRequestFullscreen;
-                          
-                          if (requestFullscreen) {
-                            requestFullscreen.call(element);
-                            console.log('[MultiWindow] Requested fullscreen via API');
-                          } else {
-                            console.log('[MultiWindow] Fullscreen API not supported');
-                          }
-                        } catch(e) {
-                          console.error('[MultiWindow] Error requesting fullscreen:', e);
-                        }
-                      }
-                    });
-                  } catch(e) {
-                    console.error('[MultiWindow] Error in initialization script:', e);
-                  }
-                `
-                // Execute the script in the child window
-                // Use Function constructor as a safer alternative to direct eval
-                if (childWindow.value) {
-                  try {
-                    // @ts-ignore - Ignoring type check for eval which is needed for this functionality
-                    childWindow.value.eval(maximizeScript);
-                  } catch (evalError) {
-                    // Fallback if eval is not available
-                    const scriptEl = childWindow.value.document.createElement('script');
-                    scriptEl.textContent = maximizeScript;
-                    childWindow.value.document.head.appendChild(scriptEl);
-                  }
-                }
-                log('Injected maximize/fullscreen handling script')
-              } catch (error) {
-                log('Error injecting maximize script', error)
-              }
-            }
-          }
-        } catch (error) {
-          log('Error during window positioning', error)
-        }
-      }, 100)
+      // Start checking after a short delay to ensure window is fully opened
+      setTimeout(checkWindow, 1000)
       
       return childWindow.value
     } catch (error) {
