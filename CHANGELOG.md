@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.1.1
+
+### Patch Changes
+
+- efae13c: fix isChildWindowOpen to be false when its closing
+
 ## 1.1.0
 
 ### Minor Changes
