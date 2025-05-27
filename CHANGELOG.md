@@ -1,5 +1,11 @@
 # vue-window-bridge
 
+## 1.1.2
+
+### Patch Changes
+
+- 30f129a: fix unload child window script
+
 ## 1.1.1
 
 ### Patch Changes
