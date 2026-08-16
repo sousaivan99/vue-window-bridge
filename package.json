@@ -26,7 +26,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check": "bun run typecheck && bun run test && bun run build",
-    "release": "changeset publish --access public",
+    "release": "changeset publish",
     "prepublishOnly": "bun run check"
   },
   "keywords": [
