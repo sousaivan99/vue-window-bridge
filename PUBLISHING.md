@@ -4,20 +4,21 @@ This document outlines the steps to publish your `vue-window-bridge` package to 
 
 ## Preparation
 
-1. Update the package version in `package.json`
-2. Update any dependencies if needed
-3. Make sure all your changes are committed
-4. Make sure all tests pass (if you add tests later)
+1. Add a Changeset with `bunx changeset`
+2. Update dependencies if needed
+3. Make sure all changes are committed
+4. Run the complete validation suite
 
 ## Build the Package
 
 Build the package to ensure everything compiles correctly:
 
 ```bash
-npm run build
+bun run check
+bun run test:e2e
 ```
 
-This will compile the TypeScript files into JavaScript in the `dist` folder.
+This type-checks the source, runs the unit and real-browser tests, and builds both package formats. Install the pinned test browsers once with `bunx playwright install chromium firefox`.
 
 ## Login to npm
 
@@ -31,23 +32,23 @@ Follow the prompts to enter your npm credentials.
 
 ## Publishing
 
-There are two ways to publish:
+### Recommended: automated release
 
-### 1. Using npm publish directly
+Push the change and its Changeset to `main`. After CI passes, the Changesets workflow creates or updates a release pull request. Merge that pull request to publish the package.
 
-```bash
-npm publish
-```
+The Changeset updates `package.json`, `CHANGELOG.md`, the Git tag, and the GitHub release for you.
 
-### 2. Using the prepublishOnly script
+### Manual release
 
-Since the `prepublishOnly` script is set up in your package.json, you can simply run:
+If automation is unavailable, apply the Changeset version first and then publish:
 
 ```bash
-npm publish
+bunx changeset version
+bun run check
+npm publish --access public
 ```
 
-The build will run automatically before publishing.
+The `prepublishOnly` script runs the same validation again before npm publishes.
 
 ## Publishing a Scoped Package
 
@@ -68,9 +69,9 @@ npm publish --access public
 
 ## After Publishing
 
-1. Create a new GitHub release/tag
-2. Announce the new version on relevant platforms
-3. Update any documentation or examples if necessary
+1. Confirm the new version on npm and GitHub
+2. Test installation in a small Vue app
+3. Announce the new version if needed
 
 ## Versioning Guidelines
 
@@ -78,4 +79,4 @@ Follow semantic versioning (SemVer):
 
 - **Major version (1.0.0)**: Breaking changes
 - **Minor version (0.1.0)**: New features, no breaking changes
-- **Patch version (0.0.1)**: Bug fixes and minor changes 
+- **Patch version (0.0.1)**: Bug fixes and minor changes

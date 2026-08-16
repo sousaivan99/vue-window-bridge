@@ -1,7 +1,7 @@
 {
   "name": "vue-window-bridge",
-  "version": "1.1.3",
-  "description": "Vue composable for managing multiple windows across displays, with cross-window communication",
+  "version": "2.0.0",
+  "description": "A beginner-friendly Vue composable for opening and connecting browser windows",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -18,11 +18,16 @@
       "require": "./dist/index.cjs"
     }
   },
+  "sideEffects": false,
   "scripts": {
     "build": "tsup",
-    "lint": "tsc",
+    "typecheck": "tsc",
+    "lint": "bun run typecheck",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check": "bun run typecheck && bun run test && bun run build",
     "release": "changeset publish --access public",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run check"
   },
   "keywords": [
     "vue",
@@ -38,9 +43,21 @@
     "vue": "^3.0.0"
   },
   "devDependencies": {
-    "@changesets/cli": "latest",
-    "tsup": "latest",
-    "typescript": "^5.0.0"
+    "@changesets/cli": "^3.0.0",
+    "@playwright/test": "^1.62.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "brace-expansion": "2.1.4",
+    "esbuild": "0.28.2",
+    "glob": "10.5.0",
+    "minimatch": "9.0.7",
+    "nanoid": "3.3.18",
+    "picomatch": "4.0.5",
+    "postcss": "8.5.26",
+    "rollup": "4.62.4"
   },
   "repository": {
     "type": "git",
