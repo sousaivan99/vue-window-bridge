@@ -1,4 +1,15 @@
-// src/index.ts
-import { useMultiWindow } from './useMultiWindow.js'; // No .js extension
-export { useMultiWindow };
-export type { MultiWindowOptions } from './useMultiWindow.js';
+export { useWindowBridge } from './useWindowBridge.js'
+export type {
+  OpenWindowFailureReason,
+  OpenWindowOptions,
+  OpenWindowResult,
+  ScreenChoice,
+  WindowBridge,
+  WindowBridgeDebugEvent,
+  WindowBridgeLogger,
+  WindowBridgeOptions,
+  WindowFallback,
+  WindowFallbackReason,
+  WindowPlacement,
+  WindowSize,
+} from './useWindowBridge.js'

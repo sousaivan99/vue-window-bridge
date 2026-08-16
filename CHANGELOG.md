@@ -1,5 +1,15 @@
 # vue-window-bridge
 
+## 2.0.0
+
+### Major Changes
+
+- Replaced `useMultiWindow()` with the beginner-friendly `useWindowBridge()` API.
+- Renamed window actions to `openWindow()`, `closeWindow()`, `sendToWindow()`, `sendToMainWindow()`, and `enterFullscreen()`.
+- Added typed open results, typed two-way messages, screen and size customization, secure same-origin message validation, and automatic Vue lifecycle cleanup.
+- Updated multi-screen behavior for the current Window Management API, with exact placement in supported Chromium browsers and a safe current-screen fallback elsewhere.
+- Added complete v2 documentation, migration guidance, tests, ESM/CJS package verification, and updated build and release tooling.
+
 ## 1.1.3
 
 ### Patch Changes
